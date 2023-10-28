@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 import ro.bagatictac.itfest2023be.domain.gateway.*
 import ro.bagatictac.itfest2023be.domain.model.*
 import ro.bagatictac.itfest2023be.domain.repository.CourierOrderSortRepository
@@ -67,7 +68,6 @@ class OrderTransformerService(
                     .flatMap { availableCouriers ->
                         lambdaGateway.getCouriersAssigned(unassignedOrders, availableCouriers)
                     }
-                    .onErrorResume { log.info("Cannot assign available couriers to available orders. They are too far!"); Mono.empty()}
             }
     }
 

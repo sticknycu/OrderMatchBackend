@@ -59,7 +59,22 @@ class LambdaGateway(private val lambdaWebClient: WebClient,
                                         )
                                     }
                             }
-                    }
+                    }.switchIfEmpty(Flux.fromIterable(assignmentResult.orderActions)
+                        .flatMap { action ->
+                            ordersRepository.updateAssignedCourierId(courierId, action.orderId)
+                                .flatMap {
+                                    courierOrderSortRepository.save(
+                                        CourierOrderSort(
+                                            courierId = courierId,
+                                            orderId = action.orderId,
+                                            venueId = action.venueId,
+                                            sort = 1,
+                                            actionType = action.actionType,
+                                            status = CourierOrderSortStatus.IN_PROGRESS
+                                        )
+                                    )
+                                }
+                        })
             }
     }
 }

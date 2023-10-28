@@ -1,5 +1,6 @@
 package ro.bagatictac.itfest2023be.domain.repository
 
+import org.springframework.data.r2dbc.repository.Modifying
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.r2dbc.repository.R2dbcRepository
 import reactor.core.publisher.Flux
@@ -19,6 +20,7 @@ interface CourierOrderSortRepository : R2dbcRepository<CourierOrderSort, Long> {
 
     fun findAllByStatusAndCourierIdOrderBySortDesc(status: CourierOrderSortStatus, courierId: UUID): Flux<CourierOrderSort>
 
+    @Modifying
     @Query("UPDATE courier_order_sort SET status = :status WHERE uuid = :uuid")
     fun updateStatusById(status: CourierOrderSortStatus, uuid: UUID): Mono<Long>
 }
