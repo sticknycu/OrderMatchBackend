@@ -1,12 +1,16 @@
 package ro.bagatictac.itfest2023be.domain.gateway
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.kotlin.core.publisher.toMono
 import ro.bagatictac.itfest2023be.domain.model.*
+import ro.bagatictac.itfest2023be.infrastructure.configuration.LocalDateTimeDeserializer
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 
 @Component
@@ -18,11 +22,12 @@ class LambdaGateway(private val lambdaWebClient: WebClient) {
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .toMono()
-            .flatMap { response -> response.bodyToMono(ResponseLambda::class.java) }
+            .flatMap { response -> response
+                .bodyToMono(ResponseLambda::class.java) }
 }
 
 data class LambdaRequest(
-    val unasignedOrders: List<LambdaOrder>,
+    val unassignedOrders: List<LambdaOrder>,
     val availableCouriers: List<LambdaCourier>
 )
 
@@ -40,6 +45,7 @@ data class LambdaCourier(
 )
 
 data class LambdaVenue(
+    val uuid: UUID,
     val name: String,
     val typeOfVenue: VenueType,
     val long: Double,
@@ -48,19 +54,21 @@ data class LambdaVenue(
 )
 
 data class LambdaOrder(
+    val uuid: UUID,
     val pickupVenue: LambdaVenue,
     val deliveryVenue: LambdaVenue,
     val rating: Int,
-    val pickupTime: Date,
-    val deliveryTime: Date,
+    val pickupTime: LocalDateTime,
+    val deliveryTime: LocalDateTime,
     val pickupDistance: Double,
     val deliveryDistance: Double,
     val status: OrderStatus,
     val capacity: Int,
-    val createdAt: Date
+    val createdAt: LocalDateTime
 )
 
 data class LambdaCourierOrderSort(
+    val uuid: Long,
     val actionType: CourierOrderSortActionType,
     val sort: Int,
     val status: CourierOrderSortStatus,
@@ -68,13 +76,19 @@ data class LambdaCourierOrderSort(
 )
 
 data class ResponseLambda(
-    val assignmentResults: List<OrderActionsResponse>
+    val assignmentResults: List<AssignmentResult>
+)
+
+data class AssignmentResult(
+    val courierId: UUID,
+    val orderActions: List<OrderActionsResponse>
 )
 
 data class OrderActionsResponse(
     val orderId: UUID,
     val venueId: UUID,
     val estimatedDistance: Double,
+    @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     val estimatedTime: LocalDateTime,
     val actionType: String
 )

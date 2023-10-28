@@ -13,7 +13,7 @@ class Venue(
     @Id
     @Column(name = "uuid")
     @UuidGenerator
-    val uuid: UUID? = null,
+    val uuid: UUID? = UUID.randomUUID(),
 
     val name: String,
 
@@ -29,5 +29,5 @@ class Venue(
 )
 
 enum class VenueType {
-    RESTAURANT, MARKET_PLACE, FOOD_BANK, SHELTERS
+    RESTAURANT, MARKETPLACE, FOOD_BANK, SHELTER
 }

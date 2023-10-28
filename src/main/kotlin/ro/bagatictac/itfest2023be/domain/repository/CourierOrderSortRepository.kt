@@ -8,5 +8,7 @@ import java.util.UUID
 
 interface CourierOrderSortRepository : R2dbcRepository<CourierOrderSort, Long> {
 
+    fun findAllByCourierId(courierId: UUID): Flux<CourierOrderSort>
+
     fun findAllByStatusAndCourierIdOrderBySortDesc(status: CourierOrderSortStatus, courierId: UUID): Flux<CourierOrderSort>
 }

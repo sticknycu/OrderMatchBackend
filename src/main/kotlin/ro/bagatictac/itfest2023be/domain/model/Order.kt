@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UuidGenerator
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
 import java.util.*
 
 @Table("orders")
@@ -15,7 +16,7 @@ class Order(
     @Id
     @Column(name = "uuid")
     @UuidGenerator
-    val uuid: UUID? = null,
+    val uuid: UUID? = UUID.randomUUID(),
 
     @Column(name = "assigned_courier_id")
     val assignedCourierId: UUID? = null,
@@ -29,10 +30,10 @@ class Order(
     val rating: Int,
 
     @Column(name = "pickup_time")
-    val pickupTime: Date,
+    val pickupTime: LocalDateTime,
 
     @Column(name = "delivery_time")
-    val deliveryTime: Date,
+    val deliveryTime: LocalDateTime,
 
     @Column(name = "pickup_distance")
     val pickupDistance: Double,
@@ -46,9 +47,9 @@ class Order(
 
     @CreatedDate
     @Column(name = "created_at")
-    val createdAt: Date
+    val createdAt: LocalDateTime
 )
 
 enum class OrderStatus {
-    IN_PROGRESS, FINISHED
+    IN_PROGRESS, FINISHED, PICKING_UP
 }

@@ -30,7 +30,7 @@ class OrderTransformerService(
                     .flatMap { courierOrderSortList ->
                         Flux.fromIterable(courierOrderSortList)
                             .flatMap { courierOrderSort ->
-                                venuesRepository.findById(courierOrderSort.venueId)
+                                venuesRepository.findByUuid(courierOrderSort.venueId)
                                     .map { venue ->
                                         courierOrderSort.toLambdaCourierOrderSort(venue)
                                     }
@@ -46,8 +46,8 @@ class OrderTransformerService(
     fun getUnassignedOrders(venueRequestBody: VenueRequestBody): Flux<LambdaOrder> {
         return ordersRepository.findAllByAssignedCourierIdIsNull()
             .flatMap { order ->
-                venuesRepository.findById(venueRequestBody.pickUpVenueId).flatMap { pickUpVenue ->
-                    venuesRepository.findById(venueRequestBody.deliveryVenueId).map { deliveryVenue ->
+                venuesRepository.findByUuid(venueRequestBody.pickUpVenueId).flatMap { pickUpVenue ->
+                    venuesRepository.findByUuid(venueRequestBody.deliveryVenueId).map { deliveryVenue ->
                         order.toLambdaOrder(pickUpVenue, deliveryVenue)
                     }
                 }
@@ -66,6 +66,7 @@ class OrderTransformerService(
 
     private fun Order.toLambdaOrder(pickupVenue: Venue, deliveryVenue: Venue) =
         LambdaOrder(
+            uuid = this.uuid!!,
             pickupVenue = pickupVenue.toLambdaVenue(),
             deliveryVenue = deliveryVenue.toLambdaVenue(),
             rating = this.rating,
@@ -80,6 +81,7 @@ class OrderTransformerService(
 
     private fun Venue.toLambdaVenue() =
         LambdaVenue(
+            uuid = this.uuid!!,
             name = this.name,
             typeOfVenue = this.typeOfVenue,
             long = this.long,
@@ -89,6 +91,7 @@ class OrderTransformerService(
 
     private fun CourierOrderSort.toLambdaCourierOrderSort(venue: Venue) =
         LambdaCourierOrderSort(
+            uuid = this.id!!,
             actionType = this.actionType,
             sort = this.sort,
             status = this.status,

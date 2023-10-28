@@ -11,7 +11,7 @@ class Courier(
     @Id
     @Column(name = "uuid")
     @UuidGenerator
-    val uuid: UUID? = null,
+    val uuid: UUID? = UUID.randomUUID(),
 
     val name: String,
 

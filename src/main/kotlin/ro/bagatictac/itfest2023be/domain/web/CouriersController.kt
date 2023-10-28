@@ -1,6 +1,7 @@
 package ro.bagatictac.itfest2023be.domain.web
 
 import org.springframework.web.bind.annotation.*
+import reactor.core.publisher.Flux
 import ro.bagatictac.itfest2023be.domain.model.Courier
 import ro.bagatictac.itfest2023be.domain.model.CourierStatus
 import ro.bagatictac.itfest2023be.domain.model.VehicleType
@@ -17,6 +18,15 @@ class CouriersController(
     @GetMapping("/all-id-name")
     fun getAllCouriersIdAndName() =
         couriersService.getAllCouriersIdAndName()
+
+    @GetMapping("/all")
+    fun getAllCouriers() =
+        couriersService.getAllCouriers()
+
+    @GetMapping("/actions/{courierId}")
+    fun getCourierActions(@PathVariable courierId: UUID) =
+        couriersService.getCourierActions(courierId)
+
 
     @PostMapping
     fun saveCourier(@RequestBody courierDto: CourierDto) =

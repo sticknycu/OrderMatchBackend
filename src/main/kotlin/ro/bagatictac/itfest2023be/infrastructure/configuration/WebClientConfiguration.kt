@@ -9,7 +9,6 @@ import reactor.core.publisher.Mono
 
 @Configuration
 class WebClientConfiguration {
-
     @Bean
     fun lambdaWebClient(): WebClient =
         WebClient.create("http://192.168.1.135:4009/dev/dispatch")
