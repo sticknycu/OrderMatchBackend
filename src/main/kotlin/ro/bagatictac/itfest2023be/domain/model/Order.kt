@@ -1,4 +1,4 @@
-package ro.bagatictac.itfest2023be.domain
+package ro.bagatictac.itfest2023be.domain.model
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

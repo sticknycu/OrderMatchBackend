@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS venues (
 
 CREATE TABLE IF NOT EXISTS orders (
                                       uuid UUID PRIMARY KEY,
-                                      assigned_courier_id UUID REFERENCES couriers(uuid),
+                                      assigned_courier_id UUID,
                                       pickup_venue_id UUID REFERENCES venues(uuid),
                                       delivery_venue_id UUID REFERENCES venues(uuid),
                                       rating INTEGER,
@@ -33,6 +33,9 @@ CREATE TABLE IF NOT EXISTS orders (
                                       capacity INTEGER,
                                       created_at TIMESTAMP
 );
+
+CREATE INDEX idx_orders_assigned_courier_id
+    ON orders(assigned_courier_id);
 
 CREATE TABLE IF NOT EXISTS courier_order_sort (
                                     id SERIAL PRIMARY KEY,
