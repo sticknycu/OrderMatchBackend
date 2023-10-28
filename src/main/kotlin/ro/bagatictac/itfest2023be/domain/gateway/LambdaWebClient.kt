@@ -32,6 +32,7 @@ data class LambdaRequest(
 )
 
 class LambdaCourier(
+    val uuid: UUID,
     val name: String,
     val phoneNumber: String,
     val vehicleType: String,
