@@ -37,10 +37,13 @@ CREATE TABLE IF NOT EXISTS orders (
 CREATE INDEX idx_orders_assigned_courier_id
     ON orders(assigned_courier_id);
 
+
 CREATE TABLE IF NOT EXISTS courier_order_sort (
                                     id SERIAL PRIMARY KEY,
                                     courier_id UUID REFERENCES couriers(uuid),
                                     order_id UUID REFERENCES orders(uuid),
                                     action_type VARCHAR(10), -- PICKUP or DROPOFF
-                                    sort SERIAL
+                                    sort SERIAL,
+                                    status VARCHAR, -- IN_PROGRESS / FINISHED
+                                    venue_id UUID REFERENCES venues(uuid)
 );

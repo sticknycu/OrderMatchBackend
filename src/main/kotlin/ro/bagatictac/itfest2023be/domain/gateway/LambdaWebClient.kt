@@ -1,15 +1,10 @@
 package ro.bagatictac.itfest2023be.domain.gateway
 
-import jakarta.persistence.Column
-import jakarta.persistence.Id
-import org.springframework.data.annotation.CreatedDate
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
-import ro.bagatictac.itfest2023be.domain.model.Courier
-import ro.bagatictac.itfest2023be.domain.model.Order
+import reactor.kotlin.core.publisher.toMono
 import java.util.*
 
 @Component
@@ -21,20 +16,34 @@ class LambdaWebClient(private val lambdaWebClient: WebClient) {
     // unavailableCouriers: []
 
     // response:
-    fun getCouriersAssigned(unasignedOrders: List<LambdaOrder>) =
+    fun getCouriersAssigned(unasignedOrders: List<LambdaOrder>, availableCouriers: List<LambdaCourier>) =
         lambdaWebClient.post()
-            .body(BodyInserters.fromValue(LambdaRequest(unasignedOrders)))
+            .body(BodyInserters.fromValue(LambdaRequest(unasignedOrders, availableCouriers)))
             .accept(MediaType.APPLICATION_JSON)
-            .exchange().flatMap { response -> response.bodyToMono(LambdaResponse::class.java) }
+            .retrieve()
+            .toMono()
+            .flatMap { response -> response.bodyToMono(LambdaResponse::class.java) }
 
 }
 
 data class LambdaRequest(
-    private val unasignedOrders: List<LambdaOrder>
+    val unasignedOrders: List<LambdaOrder>,
+    val availableCouriers: List<LambdaCourier>
 )
 
-data class LambdaVanue(
-    val uuid: UUID,
+class LambdaCourier(
+    val name: String,
+    val phoneNumber: String,
+    val vehicleType: String,
+    val vehicleEmission: Double,
+    val long: Double,
+    val lat: Double,
+    val maxCapacity: Int,
+    val status: String,
+    val actions: List<LambdaCourierOrderSort>
+)
+
+data class LambdaVenue(
     val name: String,
     val typeOfVenue: String,
     val long: Double,
@@ -43,10 +52,8 @@ data class LambdaVanue(
 )
 
 data class LambdaOrder(
-    val uuid: UUID,
-    val assignedCourierId: UUID,
-    val pickupVenue: LambdaVanue,
-    val deliveryVenue: LambdaVanue,
+    val pickupVenue: LambdaVenue,
+    val deliveryVenue: LambdaVenue,
     val rating: Int,
     val pickupTime: Date,
     val deliveryTime: Date,
@@ -55,6 +62,13 @@ data class LambdaOrder(
     val status: String,
     val capacity: Int,
     val createdAt: Date
+)
+
+class LambdaCourierOrderSort(
+    val actionType: String,
+    val sort: Int,
+    val status: String,
+    val venueId: LambdaVenue
 )
 
 data class LambdaResponse(

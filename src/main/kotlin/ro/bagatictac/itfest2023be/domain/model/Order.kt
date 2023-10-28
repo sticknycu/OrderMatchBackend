@@ -16,7 +16,7 @@ class Order(
     private val uuid: UUID,
 
     @Column(name = "assigned_courier_id")
-    val assignedCourierId: UUID,
+    val assignedCourierId: UUID? = null,
 
     @Column(name = "pickup_venue_id")
     val pickupVenueId: UUID,

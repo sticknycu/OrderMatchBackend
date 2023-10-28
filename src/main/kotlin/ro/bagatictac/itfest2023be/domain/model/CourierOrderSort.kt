@@ -21,5 +21,10 @@ class CourierOrderSort(
     @Column(name = "action_type")
     val actionType: String,
 
-    val sort: Int
+    val sort: Int,
+
+    val status: String,
+
+    @Column(name = "venue_id")
+    val venueId: UUID
 )
