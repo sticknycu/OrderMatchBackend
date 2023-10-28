@@ -1,16 +1,16 @@
 package ro.bagatictac.itfest2023be.domain.gateway
 
-import com.fasterxml.jackson.databind.deser.std.UUIDDeserializer
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.kotlin.core.publisher.toMono
+import ro.bagatictac.itfest2023be.domain.model.*
 import java.time.LocalDateTime
 import java.util.*
 
 @Component
-class LambdaWebClient(private val lambdaWebClient: WebClient) {
+class LambdaGateway(private val lambdaWebClient: WebClient) {
 
     // status=free, delivery couries and list of orders with couriers id = null
     // requestbody
@@ -24,8 +24,7 @@ class LambdaWebClient(private val lambdaWebClient: WebClient) {
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .toMono()
-            .flatMap { response -> response.bodyToMono(LambdaResponse::class.java) }
-
+            .flatMap { response -> response.bodyToMono(ResponseLambda::class.java) }
 }
 
 data class LambdaRequest(
@@ -33,22 +32,22 @@ data class LambdaRequest(
     val availableCouriers: List<LambdaCourier>
 )
 
-class LambdaCourier(
+data class LambdaCourier(
     val uuid: UUID,
     val name: String,
     val phoneNumber: String,
-    val vehicleType: String,
+    val vehicleType: VehicleType,
     val vehicleEmission: Double,
     val long: Double,
     val lat: Double,
     val maxCapacity: Int,
-    val status: String,
-    val actions: List<LambdaCourierOrderSort>
+    val status: CourierStatus,
+    val actions: List<LambdaCourierOrderSort>? = listOf()
 )
 
 data class LambdaVenue(
     val name: String,
-    val typeOfVenue: String,
+    val typeOfVenue: VenueType,
     val long: Double,
     val lat: Double,
     val isDonating: Boolean
@@ -62,16 +61,16 @@ data class LambdaOrder(
     val deliveryTime: Date,
     val pickupDistance: Double,
     val deliveryDistance: Double,
-    val status: String,
+    val status: OrderStatus,
     val capacity: Int,
     val createdAt: Date
 )
 
-class LambdaCourierOrderSort(
-    val actionType: String,
+data class LambdaCourierOrderSort(
+    val actionType: CourierOrderSortActionType,
     val sort: Int,
-    val status: String,
-    val venueId: LambdaVenue
+    val status: CourierOrderSortStatus,
+    val venue: LambdaVenue
 )
 
 data class ResponseLambda(
@@ -84,8 +83,4 @@ data class OrderActionsResponse(
     val estimatedDistance: Double,
     val estimatedTime: LocalDateTime,
     val actionType: String
-)
-
-data class LambdaResponse(
-    val response: String
 )

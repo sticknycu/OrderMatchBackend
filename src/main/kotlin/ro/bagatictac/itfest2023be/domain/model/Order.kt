@@ -38,7 +38,7 @@ class Order(
     @Column(name = "delivery_distance")
     val deliveryDistance: Double,
 
-    val status: String,
+    val status: OrderStatus,
 
     val capacity: Int,
 
@@ -46,3 +46,7 @@ class Order(
     @Column(name = "created_at")
     val createdAt: Date
 )
+
+enum class OrderStatus {
+    IN_PROGRESS, FINISHED
+}
