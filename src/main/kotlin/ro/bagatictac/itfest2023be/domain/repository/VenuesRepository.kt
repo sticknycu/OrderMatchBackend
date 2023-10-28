@@ -8,4 +8,6 @@ import java.util.UUID
 interface VenuesRepository : R2dbcRepository<Venue, UUID> {
 
     fun findByUuidIn(uuids: List<UUID>): Flux<Venue>
+
+    fun findAllByDonating(isDonating: Boolean): Flux<Venue>
 }

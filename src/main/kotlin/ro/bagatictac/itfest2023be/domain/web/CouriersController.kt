@@ -5,6 +5,7 @@ import ro.bagatictac.itfest2023be.domain.model.Courier
 import ro.bagatictac.itfest2023be.domain.model.CourierStatus
 import ro.bagatictac.itfest2023be.domain.model.VehicleType
 import ro.bagatictac.itfest2023be.domain.service.CouriersService
+import java.util.*
 
 @RestController
 @RequestMapping("/couriers")
@@ -13,8 +14,21 @@ class CouriersController(
     private val couriersService: CouriersService
 ) {
 
+    @GetMapping("/all-id-name")
+    fun getAllCouriersIdAndName() =
+        couriersService.getAllCouriersIdAndName()
+
     @PostMapping
-    fun saveCourier(@RequestBody courierDto: CourierDto) = couriersService.saveCourier(courierDto.toCourier())
+    fun saveCourier(@RequestBody courierDto: CourierDto) =
+        couriersService.saveCourier(courierDto.toCourier())
+
+    @PatchMapping("/status")
+    fun changeCourierStatus(@RequestBody courierStatusRequest: CourierStatusRequest) =
+        couriersService.changeCourierStatus(courierStatusRequest)
+
+    @PatchMapping("/coords")
+    fun updateCourierCoords(@RequestBody courierCoordsRequest: CourierCoordsRequest) =
+        couriersService.updateCourierCoords(courierCoordsRequest)
 }
 
 private fun CourierDto.toCourier() =
@@ -28,6 +42,22 @@ private fun CourierDto.toCourier() =
         maxCapacity = this.maxCapacity,
         status = this.status
     )
+
+data class AllCouriersResponse(
+    val uuid: UUID,
+    val name: String
+)
+
+data class CourierStatusRequest(
+    val uuid: UUID,
+    val status: CourierStatus
+)
+
+data class CourierCoordsRequest(
+    val uuid: UUID,
+    val lat: Double,
+    val long: Double
+)
 
 data class CourierDto(
     val name: String,
