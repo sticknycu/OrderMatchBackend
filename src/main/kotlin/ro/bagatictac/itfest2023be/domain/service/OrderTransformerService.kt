@@ -91,7 +91,7 @@ class OrderTransformerService(
 
     private fun CourierOrderSort.toLambdaCourierOrderSort(venue: Venue) =
         LambdaCourierOrderSort(
-            uuid = this.id!!,
+            uuid = this.uuid!!,
             actionType = this.actionType,
             sort = this.sort,
             status = this.status,

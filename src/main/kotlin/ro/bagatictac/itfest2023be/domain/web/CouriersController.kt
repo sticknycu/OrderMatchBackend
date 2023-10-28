@@ -27,7 +27,6 @@ class CouriersController(
     fun getCourierActions(@PathVariable courierId: UUID) =
         couriersService.getCourierActions(courierId)
 
-
     @PostMapping
     fun saveCourier(@RequestBody courierDto: CourierDto) =
         couriersService.saveCourier(courierDto.toCourier())

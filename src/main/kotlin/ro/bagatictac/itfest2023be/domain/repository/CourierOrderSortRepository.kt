@@ -10,5 +10,9 @@ interface CourierOrderSortRepository : R2dbcRepository<CourierOrderSort, Long> {
 
     fun findAllByCourierId(courierId: UUID): Flux<CourierOrderSort>
 
+    fun findAllByCourierIdAndStatus(courierId: UUID, status: CourierOrderSortStatus): Flux<CourierOrderSort>
+
+    fun findAllByCourierIdOrderBySortDesc(courierId: UUID): Flux<CourierOrderSort>
+
     fun findAllByStatusAndCourierIdOrderBySortDesc(status: CourierOrderSortStatus, courierId: UUID): Flux<CourierOrderSort>
 }

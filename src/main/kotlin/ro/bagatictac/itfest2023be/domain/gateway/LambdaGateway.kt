@@ -5,25 +5,66 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import ro.bagatictac.itfest2023be.domain.model.*
+import ro.bagatictac.itfest2023be.domain.repository.CourierOrderSortRepository
+import ro.bagatictac.itfest2023be.domain.repository.OrdersRepository
 import ro.bagatictac.itfest2023be.infrastructure.configuration.LocalDateTimeDeserializer
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
+import kotlin.random.Random
 
 @Component
-class LambdaGateway(private val lambdaWebClient: WebClient) {
+class LambdaGateway(private val lambdaWebClient: WebClient,
+    private val ordersRepository: OrdersRepository,
+    private val courierOrderSortRepository: CourierOrderSortRepository) {
 
-    fun getCouriersAssigned(unasignedOrders: List<LambdaOrder>, availableCouriers: List<LambdaCourier>) =
+    fun getCouriersAssigned(
+        unasignedOrders: List<LambdaOrder>,
+        availableCouriers: List<LambdaCourier>
+    ): Mono<ResponseLambda> =
         lambdaWebClient.post()
             .body(BodyInserters.fromValue(LambdaRequest(unasignedOrders, availableCouriers)))
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .toMono()
-            .flatMap { response -> response
-                .bodyToMono(ResponseLambda::class.java) }
+            .flatMap { response ->
+                response
+                    .bodyToMono(ResponseLambda::class.java)
+            }
+            .flatMap { responseLambda -> update(responseLambda).then(Mono.just(responseLambda)) }
+
+    private fun update(responseLambda: ResponseLambda): Flux<CourierOrderSort> {
+        return Flux.fromIterable(responseLambda.assignmentResults)
+            .concatMap { assignmentResult ->
+                val courierId = assignmentResult.courierId
+
+                courierOrderSortRepository.findAllByCourierIdOrderBySortDesc(courierId)
+                    .take(1)
+                    .flatMap { courierOrderSort ->
+                        Flux.fromIterable(assignmentResult.orderActions)
+                            .concatMap { action ->
+                                ordersRepository.updateAssignedCourierId(courierId, action.orderId)
+                                    .flatMap {
+                                        courierOrderSortRepository.save(
+                                            CourierOrderSort(
+                                                courierId = courierId,
+                                                orderId = action.orderId,
+                                                venueId = action.venueId,
+                                                sort = courierOrderSort.sort + 1,
+                                                actionType = action.actionType,
+                                                status = CourierOrderSortStatus.IN_PROGRESS
+                                            )
+                                        )
+                                    }
+                            }
+                    }
+            }
+    }
 }
 
 data class LambdaRequest(
@@ -68,7 +109,7 @@ data class LambdaOrder(
 )
 
 data class LambdaCourierOrderSort(
-    val uuid: Long,
+    val uuid: UUID,
     val actionType: CourierOrderSortActionType,
     val sort: Int,
     val status: CourierOrderSortStatus,
@@ -90,5 +131,5 @@ data class OrderActionsResponse(
     val estimatedDistance: Double,
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     val estimatedTime: LocalDateTime,
-    val actionType: String
+    val actionType: CourierOrderSortActionType
 )

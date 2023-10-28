@@ -1,16 +1,17 @@
 package ro.bagatictac.itfest2023be.domain.model
 
 import jakarta.persistence.*
+import org.hibernate.annotations.UuidGenerator
 import org.springframework.data.relational.core.mapping.Table
 import java.util.*
-import kotlin.random.Random
 
 @Table("courier_order_sort")
 @Entity
 class CourierOrderSort(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = Random.nextLong(),
+    @Column(name = "uuid")
+    @UuidGenerator
+    val uuid: UUID? = UUID.randomUUID(),
 
     @Column(name = "courier_id")
     val courierId: UUID,
@@ -30,7 +31,7 @@ class CourierOrderSort(
 )
 
 enum class CourierOrderSortActionType {
-    PICKUP, DROPOFF
+    PICKUP, DELIVERY
 }
 
 enum class CourierOrderSortStatus {

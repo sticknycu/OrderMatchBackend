@@ -16,6 +16,12 @@ class OrdersController(
     private val ordersService: OrdersService
 ) {
 
+    @GetMapping
+    fun getOrders() = ordersService.getOrders()
+
+    @GetMapping("/actions/{courierId}")
+    fun getCourierOrderSortStatusInProgress(@PathVariable courierId: UUID) = ordersService.getCourierOrderSortStatusInProgress(courierId)
+
     @PostMapping
     fun saveOrder(@RequestBody orderDto: OrderDto) = ordersService.saveOrder(orderDto.toOrder())
 
@@ -38,14 +44,24 @@ private fun OrderDto.toOrder() =
         createdAt = this.createdAt
     )
 
+
+data class OrderResponse(
+    val assignedCourierId: UUID? = null,
+    val pickupVenueId: Venue,
+    val deliveryVenueId: Venue,
+    val rating: Int,
+    val pickupTime: LocalDateTime,
+    val deliveryTime: LocalDateTime,
+    val pickupDistance: Double,
+    val deliveryDistance: Double,
+    val status: OrderStatus,
+    val capacity: Int,
+    val createdAt: LocalDateTime
+)
+
 data class CourierActionsResponse(
     val actionType: CourierOrderSortActionType,
     val venue: Venue
-)
-
-data class OrderCoords(
-    val lat: Double,
-    val long: Double
 )
 
 data class OrderDto(

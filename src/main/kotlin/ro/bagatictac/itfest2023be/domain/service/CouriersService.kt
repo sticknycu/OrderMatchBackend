@@ -2,6 +2,7 @@ package ro.bagatictac.itfest2023be.domain.service
 
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import ro.bagatictac.itfest2023be.domain.model.Courier
 import ro.bagatictac.itfest2023be.domain.model.CourierOrderSort
 import ro.bagatictac.itfest2023be.domain.repository.CourierOrderSortRepository
@@ -21,11 +22,17 @@ class CouriersService(
 ) {
 
     fun getCourierActions(courierId: UUID) = courierOrderSortRepository.findAllByCourierId(courierId)
-        .flatMap { courierOrderSort ->
-            venuesRepository.findByUuid(courierOrderSort.venueId).map {
-                CourierActionsResponse(courierOrderSort.actionType, it)
-            }
+        .collectList()
+        .flatMapMany { courierOrderSortList ->
+            Flux.fromIterable(courierOrderSortList)
+                .flatMap { courierOrderSort ->
+                    venuesRepository.findByUuid(courierOrderSort.venueId)
+                        .map { venue ->
+                            CourierActionsResponse(courierOrderSort.actionType, venue)
+                        }
+                }
         }
+
 
     fun getAllCouriersIdAndName() = couriersRepository.findAll()
         .map { AllCouriersResponse(it.uuid!!, it.name) }

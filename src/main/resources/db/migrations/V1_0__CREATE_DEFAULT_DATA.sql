@@ -39,11 +39,11 @@ CREATE INDEX idx_orders_assigned_courier_id
 
 
 CREATE TABLE IF NOT EXISTS courier_order_sort (
-                                    id SERIAL PRIMARY KEY,
+                                    uuid UUID PRIMARY KEY,
                                     courier_id UUID REFERENCES couriers(uuid),
                                     order_id UUID REFERENCES orders(uuid),
                                     action_type VARCHAR(10), -- PICKUP or DROPOFF
-                                    sort SERIAL,
+                                    sort INT,
                                     status VARCHAR, -- IN_PROGRESS / FINISHED
                                     venue_id UUID REFERENCES venues(uuid)
 );
@@ -64,6 +64,6 @@ INSERT INTO orders (uuid, assigned_courier_id, pickup_venue_id, delivery_venue_i
 VALUES (gen_random_uuid(), null, (SELECT uuid from venues WHERE name = 'Restaurant C'), (SELECT uuid from venues WHERE name ='Shelter D'), 5, '2023-10-30 08:00:00', '2023-10-30 09:30:00', 2.5, 3.8, 'PICKING_UP', 5, '2023-10-30 07:45:00'),
        (gen_random_uuid(), null, (SELECT uuid from venues WHERE name = 'Restaurant E'), (SELECT uuid from venues WHERE name = 'Marketplace F'), 4, '2023-10-30 10:00:00', '2023-10-30 11:30:00', 1.5, 2.8, 'PICKING_UP', 7, '2023-10-30 09:30:00');
 
-INSERT INTO courier_order_sort (courier_id, order_id, action_type, sort, status, venue_id)
-VALUES ((SELECT uuid from couriers WHERE name = 'Courier 1'), (SELECT uuid from orders WHERE rating = 5), 'PICKUP', 1, 'IN_PROGRESS', (SELECT uuid from venues WHERE name = 'Restaurant A')),
-       ((SELECT uuid from couriers WHERE name = 'Courier 2'), (SELECT uuid from orders WHERE rating = 4), 'PICKUP', 1, 'IN_PROGRESS', (SELECT uuid from venues WHERE name = 'Marketplace B'));
+INSERT INTO courier_order_sort (uuid, courier_id, order_id, action_type, sort, status, venue_id)
+VALUES (gen_random_uuid(), (SELECT uuid from couriers WHERE name = 'Courier 1'), (SELECT uuid from orders WHERE rating = 5), 'PICKUP', 1, 'IN_PROGRESS', (SELECT uuid from venues WHERE name = 'Restaurant A')),
+       (gen_random_uuid(), (SELECT uuid from couriers WHERE name = 'Courier 2'), (SELECT uuid from orders WHERE rating = 4), 'PICKUP', 1, 'IN_PROGRESS', (SELECT uuid from venues WHERE name = 'Marketplace B'));
