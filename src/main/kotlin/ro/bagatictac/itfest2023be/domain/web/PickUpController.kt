@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import ro.bagatictac.itfest2023be.domain.gateway.ResponseLambda
 import ro.bagatictac.itfest2023be.domain.service.OrderTransformerService
 import java.util.*
 
@@ -17,9 +18,9 @@ class PickUpController(
     private val orderTransformerService: OrderTransformerService
 ) {
 
-//    @PostMapping("/assign")
-//    fun assignCourier(@RequestBody venueRequestBody: VenueRequestBody): Flux<LambdaResponse> =
-//        orderTransformerService.computeTransformation(venueRequestBody)
+    @PostMapping("/assign")
+    fun assignCourier(@RequestBody venueRequestBody: VenueRequestBody): Mono<ResponseLambda> =
+        orderTransformerService.getCouriersAssigned(venueRequestBody)
 }
 
 data class VenueRequestBody(

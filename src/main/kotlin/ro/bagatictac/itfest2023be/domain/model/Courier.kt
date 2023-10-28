@@ -1,8 +1,7 @@
 package ro.bagatictac.itfest2023be.domain.model
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
+import jakarta.persistence.*
+import org.hibernate.annotations.UuidGenerator
 import org.springframework.data.relational.core.mapping.Table
 import java.util.UUID
 
@@ -11,7 +10,8 @@ import java.util.UUID
 class Courier(
     @Id
     @Column(name = "uuid")
-    val uuid: UUID,
+    @UuidGenerator
+    val uuid: UUID? = null,
 
     val name: String,
 

@@ -7,6 +7,5 @@ import java.util.*
 
 interface OrdersRepository : R2dbcRepository<Order, UUID> {
 
-//    @Query("SELECT * FROM orders WHERE assignedCourierId IS NULL")
     fun findAllByAssignedCourierIdIsNull(): Flux<Order>
 }

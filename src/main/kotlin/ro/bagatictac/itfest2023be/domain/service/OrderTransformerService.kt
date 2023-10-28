@@ -1,7 +1,8 @@
 package ro.bagatictac.itfest2023be.domain.service
 
 import org.springframework.stereotype.Service
-import reactor.kotlin.core.publisher.toMono
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import ro.bagatictac.itfest2023be.domain.gateway.*
 import ro.bagatictac.itfest2023be.domain.model.*
 import ro.bagatictac.itfest2023be.domain.repository.CourierOrderSortRepository
@@ -19,23 +20,46 @@ class OrderTransformerService(
     private val courierOrderSortRepository: CourierOrderSortRepository
 ) {
 
-    fun computeTransformation(venueRequestBody: VenueRequestBody) {
-        // SELECT * FROM couriers
-        //WHERE status IN ('FREE', 'DELIVERY');
-
-        val availableCouriers = couriersRepository.findAllByStatusIn(listOf("FREE", "DELIVERY"))
-            .map { courier ->
-                courierOrderSortRepository.findAllByStatusInAndCourierIdOrderBySortDesc(
+    fun getAvailableCouriers(venueRequestBody: VenueRequestBody): Flux<LambdaCourier> {
+        return couriersRepository.findAllByStatusIn(listOf("FREE", "DELIVERY"))
+            .flatMap { courier ->
+                courierOrderSortRepository.findAllByStatusAndCourierIdOrderBySortDesc(
                     CourierOrderSortStatus.IN_PROGRESS,
-                    courier.uuid
+                    courier.uuid!!
                 ).collectList()
-                    .map { courierOrderSortList ->
-                        courier.toLambdaCourier().copy(actions = courierOrderSortList.map { courierOrderSort ->
-                            venuesRepository.findById(courierOrderSort.venueId)
-                                .map { venue ->
-                                    courierOrderSort.toLambdaCourierOrderSort(venue)
-                                }
-                        })
+                    .flatMap { courierOrderSortList ->
+                        Flux.fromIterable(courierOrderSortList)
+                            .flatMap { courierOrderSort ->
+                                venuesRepository.findById(courierOrderSort.venueId)
+                                    .map { venue ->
+                                        courierOrderSort.toLambdaCourierOrderSort(venue)
+                                    }
+                            }
+                            .collectList()
+                            .map { sortedCourierOrders ->
+                                courier.toLambdaCourier().copy(actions = sortedCourierOrders)
+                            }
+                    }
+            }
+    }
+
+    fun getUnassignedOrders(venueRequestBody: VenueRequestBody): Flux<LambdaOrder> {
+        return ordersRepository.findAllByAssignedCourierIdIsNull()
+            .flatMap { order ->
+                venuesRepository.findById(venueRequestBody.pickUpVenueId).flatMap { pickUpVenue ->
+                    venuesRepository.findById(venueRequestBody.deliveryVenueId).map { deliveryVenue ->
+                        order.toLambdaOrder(pickUpVenue, deliveryVenue)
+                    }
+                }
+            }
+    }
+
+    fun getCouriersAssigned(venueRequestBody: VenueRequestBody): Mono<ResponseLambda> {
+        return getUnassignedOrders(venueRequestBody).collectList()
+            .flatMap { unassignedOrders ->
+                getAvailableCouriers(venueRequestBody).collectList()
+                    .flatMap { availableCouriers ->
+                        lambdaGateway.getCouriersAssigned(unassignedOrders, availableCouriers)
                     }
             }
     }
@@ -73,7 +97,7 @@ class OrderTransformerService(
 
     private fun Courier.toLambdaCourier() =
         LambdaCourier(
-            uuid = this.uuid,
+            uuid = this.uuid!!,
             name = this.name,
             phoneNumber = this.phoneNumber,
             vehicleType = this.vehicleType,
@@ -83,5 +107,4 @@ class OrderTransformerService(
             maxCapacity = this.maxCapacity,
             status = this.status
         )
-
 }

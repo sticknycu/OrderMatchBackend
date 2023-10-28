@@ -1,8 +1,6 @@
 package ro.bagatictac.itfest2023be.domain.model
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
+import jakarta.persistence.*
 import org.springframework.data.relational.core.mapping.Table
 import java.util.*
 
@@ -10,7 +8,8 @@ import java.util.*
 @Entity
 class CourierOrderSort(
     @Id
-    val id: Long,
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
 
     @Column(name = "courier_id")
     val courierId: UUID,

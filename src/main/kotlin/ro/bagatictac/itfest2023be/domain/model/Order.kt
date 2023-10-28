@@ -4,6 +4,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.UuidGenerator
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.relational.core.mapping.Table
 import java.util.*
@@ -13,7 +14,8 @@ import java.util.*
 class Order(
     @Id
     @Column(name = "uuid")
-    private val uuid: UUID,
+    @UuidGenerator
+    val uuid: UUID? = null,
 
     @Column(name = "assigned_courier_id")
     val assignedCourierId: UUID? = null,

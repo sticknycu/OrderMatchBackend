@@ -12,12 +12,6 @@ import java.util.*
 @Component
 class LambdaGateway(private val lambdaWebClient: WebClient) {
 
-    // status=free, delivery couries and list of orders with couriers id = null
-    // requestbody
-    // unasignedOrders: []
-    // unavailableCouriers: []
-
-    // response:
     fun getCouriersAssigned(unasignedOrders: List<LambdaOrder>, availableCouriers: List<LambdaCourier>) =
         lambdaWebClient.post()
             .body(BodyInserters.fromValue(LambdaRequest(unasignedOrders, availableCouriers)))
