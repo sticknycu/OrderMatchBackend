@@ -1,10 +1,12 @@
 package ro.bagatictac.itfest2023be.domain.gateway
 
+import com.fasterxml.jackson.databind.deser.std.UUIDDeserializer
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.kotlin.core.publisher.toMono
+import java.time.LocalDateTime
 import java.util.*
 
 @Component
@@ -70,6 +72,18 @@ class LambdaCourierOrderSort(
     val sort: Int,
     val status: String,
     val venueId: LambdaVenue
+)
+
+data class ResponseLambda(
+    val assignmentResults: List<OrderActionsResponse>
+)
+
+data class OrderActionsResponse(
+    val orderId: UUID,
+    val venueId: UUID,
+    val estimatedDistance: Double,
+    val estimatedTime: LocalDateTime,
+    val actionType: String
 )
 
 data class LambdaResponse(
