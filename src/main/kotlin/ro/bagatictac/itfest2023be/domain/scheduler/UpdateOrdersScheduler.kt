@@ -18,7 +18,7 @@ class UpdateOrdersScheduler(
         private val log: Logger = LoggerFactory.getLogger(this::class.java)
     }
 
-    @Scheduled(cron = "0 * * * * *") // EVERY MINUTE
+    @Scheduled(fixedRate = 1000 * 60) // EVERY MINUTE
     fun runCronJob() {
         log.info("Start cronjob for assigning courier order id which are null")
         ordersRepository.findAllByAssignedCourierIdIsNull()

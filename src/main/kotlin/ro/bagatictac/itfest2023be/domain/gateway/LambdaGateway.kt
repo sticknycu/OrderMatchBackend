@@ -12,11 +12,8 @@ import ro.bagatictac.itfest2023be.domain.model.*
 import ro.bagatictac.itfest2023be.domain.repository.CourierOrderSortRepository
 import ro.bagatictac.itfest2023be.domain.repository.OrdersRepository
 import ro.bagatictac.itfest2023be.infrastructure.configuration.LocalDateTimeDeserializer
-import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.*
-import kotlin.random.Random
 
 @Component
 class LambdaGateway(private val lambdaWebClient: WebClient,
@@ -24,11 +21,11 @@ class LambdaGateway(private val lambdaWebClient: WebClient,
     private val courierOrderSortRepository: CourierOrderSortRepository) {
 
     fun getCouriersAssigned(
-        unasignedOrders: List<LambdaOrder>,
+        unassignedOrders: List<LambdaOrder>,
         availableCouriers: List<LambdaCourier>
     ): Mono<ResponseLambda> =
         lambdaWebClient.post()
-            .body(BodyInserters.fromValue(LambdaRequest(unasignedOrders, availableCouriers)))
+            .body(BodyInserters.fromValue(LambdaRequest(unassignedOrders, availableCouriers)))
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .toMono()

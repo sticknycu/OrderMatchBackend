@@ -1,10 +1,8 @@
 package ro.bagatictac.itfest2023be.domain.web
 
 import org.springframework.web.bind.annotation.*
-import ro.bagatictac.itfest2023be.domain.model.CourierOrderSortActionType
-import ro.bagatictac.itfest2023be.domain.model.Order
-import ro.bagatictac.itfest2023be.domain.model.OrderStatus
-import ro.bagatictac.itfest2023be.domain.model.Venue
+import ro.bagatictac.itfest2023be.domain.gateway.LambdaCourierOrderSort
+import ro.bagatictac.itfest2023be.domain.model.*
 import ro.bagatictac.itfest2023be.domain.service.OrdersService
 import java.time.LocalDateTime
 import java.util.*
@@ -15,6 +13,9 @@ import java.util.*
 class OrdersController(
     private val ordersService: OrdersService
 ) {
+
+    @PatchMapping("/update-actions")
+    fun updateActions(@RequestBody updateActionOrdersRequest: UpdateActionOrdersRequest) = ordersService.updateActions(updateActionOrdersRequest)
 
     @GetMapping
     fun getOrders() = ordersService.getOrders()
@@ -43,6 +44,19 @@ private fun OrderDto.toOrder() =
         capacity = this.capacity,
         createdAt = this.createdAt
     )
+
+data class UpdateActionOrdersRequest(
+    val courierId: UUID,
+    val actionId: UUID,
+    val orderId: UUID,
+    val orderStatus: OrderStatus,
+    val courierStatus: CourierStatus
+)
+
+data class CourierOrderSortResponse(
+    val courierOrderSort: CourierOrderSort,
+    val venue: Venue
+)
 
 
 data class OrderResponse(

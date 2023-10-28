@@ -4,9 +4,12 @@ import org.springframework.stereotype.Service
 import ro.bagatictac.itfest2023be.domain.model.CourierOrderSortStatus
 import ro.bagatictac.itfest2023be.domain.model.Order
 import ro.bagatictac.itfest2023be.domain.repository.CourierOrderSortRepository
+import ro.bagatictac.itfest2023be.domain.repository.CouriersRepository
 import ro.bagatictac.itfest2023be.domain.repository.OrdersRepository
 import ro.bagatictac.itfest2023be.domain.repository.VenuesRepository
+import ro.bagatictac.itfest2023be.domain.web.CourierOrderSortResponse
 import ro.bagatictac.itfest2023be.domain.web.OrderResponse
+import ro.bagatictac.itfest2023be.domain.web.UpdateActionOrdersRequest
 import ro.bagatictac.itfest2023be.domain.web.VenueRequestBody
 import java.util.*
 
@@ -14,12 +17,13 @@ import java.util.*
 class OrdersService(
     private val ordersRepository: OrdersRepository,
     private val venueRepository: VenuesRepository,
-    private val courierOrderSortRepository: CourierOrderSortRepository
+    private val courierOrderSortRepository: CourierOrderSortRepository,
+    private val couriersRepository: CouriersRepository
 ) {
-    
+
     fun getOrders() = ordersRepository.findAll()
         .flatMap {
-            venueRepository.findByUuid(it.pickupVenueId).flatMap {pickUpVenue ->
+            venueRepository.findByUuid(it.pickupVenueId).flatMap { pickUpVenue ->
                 venueRepository.findByUuid(it.deliveryVenueId).map { deliveryVenue ->
                     OrderResponse(
                         assignedCourierId = it.assignedCourierId,
@@ -35,14 +39,25 @@ class OrdersService(
                         createdAt = it.createdAt
                     )
                 }
-                
+
             }
-            
+
         }
 
     fun getBatches(venueRequestBody: VenueRequestBody) = venueRepository.findByUuid(venueRequestBody.deliveryVenueId)
 
     fun saveOrder(order: Order) = ordersRepository.save(order)
 
-    fun getCourierOrderSortStatusInProgress(courierId: UUID) = courierOrderSortRepository.findAllByCourierIdAndStatus(courierId, CourierOrderSortStatus.IN_PROGRESS)
+    fun updateActions(updateActionOrdersRequest: UpdateActionOrdersRequest) =
+        ordersRepository.updateStatus(updateActionOrdersRequest.orderStatus, updateActionOrdersRequest.orderId)
+            .flatMap {
+                couriersRepository.updateCourierStatusByUuid(updateActionOrdersRequest.courierStatus, updateActionOrdersRequest.courierId)
+                    .flatMap { courierOrderSortRepository.updateStatusById(CourierOrderSortStatus.FINISHED, updateActionOrdersRequest.actionId) }}
+
+    fun getCourierOrderSortStatusInProgress(courierId: UUID) =
+        courierOrderSortRepository.findAllByCourierIdAndStatus(courierId, CourierOrderSortStatus.IN_PROGRESS)
+            .flatMap { courierOrderSort ->
+                venueRepository.findByUuid(courierOrderSort.venueId)
+                    .map { CourierOrderSortResponse(courierOrderSort, it) }
+            }
 }

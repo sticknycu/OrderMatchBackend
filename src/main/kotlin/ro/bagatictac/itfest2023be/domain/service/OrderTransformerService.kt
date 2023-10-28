@@ -1,5 +1,7 @@
 package ro.bagatictac.itfest2023be.domain.service
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -19,6 +21,10 @@ class OrderTransformerService(
     private val lambdaGateway: LambdaGateway,
     private val courierOrderSortRepository: CourierOrderSortRepository
 ) {
+
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(this::class.java)
+    }
 
     fun getAvailableCouriers(venueRequestBody: VenueRequestBody): Flux<LambdaCourier> {
         return couriersRepository.findAllByStatusIn(listOf("FREE", "DELIVERY"))
@@ -61,6 +67,7 @@ class OrderTransformerService(
                     .flatMap { availableCouriers ->
                         lambdaGateway.getCouriersAssigned(unassignedOrders, availableCouriers)
                     }
+                    .onErrorResume { log.info("Cannot assign available couriers to available orders. They are too far!"); Mono.empty()}
             }
     }
 
