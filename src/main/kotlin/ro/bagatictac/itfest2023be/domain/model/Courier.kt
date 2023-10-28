@@ -19,7 +19,7 @@ class Courier(
     val phoneNumber: String,
 
     @Column(name = "vehicle_type")
-    val vehicleType: String,
+    val vehicleType: VehicleType,
 
     @Column(name = "vehicle_emission")
     val vehicleEmission: Double,
@@ -33,5 +33,13 @@ class Courier(
     @Column(name = "max_capacity")
     val maxCapacity: Int,
 
-    val status: String
+    val status: CourierStatus
 )
+
+enum class CourierStatus {
+    FREE, PICKUP, DELIVERY, DEACTIVATED
+}
+
+enum class VehicleType {
+    ELECTRIC, NORMAL
+}

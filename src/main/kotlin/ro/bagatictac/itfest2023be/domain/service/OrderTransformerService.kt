@@ -2,31 +2,27 @@ package ro.bagatictac.itfest2023be.domain.service
 
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
-import ro.bagatictac.itfest2023be.domain.gateway.LambdaRequest
 import ro.bagatictac.itfest2023be.domain.gateway.LambdaResponse
-import ro.bagatictac.itfest2023be.domain.repository.CourierRepository
-import ro.bagatictac.itfest2023be.domain.repository.OrderRepository
-import ro.bagatictac.itfest2023be.domain.repository.VenueRepository
+import ro.bagatictac.itfest2023be.domain.repository.CouriersRepository
+import ro.bagatictac.itfest2023be.domain.repository.OrdersRepository
+import ro.bagatictac.itfest2023be.domain.repository.VenuesRepository
 import ro.bagatictac.itfest2023be.domain.web.VenueRequestBody
-import java.util.*
 
 @Service
 class OrderTransformerService(
-    private val orderRepository: OrderRepository,
-    private val venueRepository: VenueRepository,
-    private val courierRepository: CourierRepository
+    private val ordersRepository: OrdersRepository,
+    private val venuesRepository: VenuesRepository,
+    private val couriersRepository: CouriersRepository
 ) {
 
     fun computeTransformation(venueRequestBody: VenueRequestBody): Flux<LambdaResponse> {
         // SELECT * FROM couriers
         //WHERE status IN ('FREE', 'DELIVERY');
-        return venueRepository.findByUuidIn(listOf(venueRequestBody.deliveryVenueId, venueRequestBody.pickUpVenueId))
+        return venuesRepository.findByUuidIn(listOf(venueRequestBody.deliveryVenueId, venueRequestBody.pickUpVenueId))
             .flatMap { venue ->
-                courierRepository.findAllByStatusIn(listOf("FREE", "DELIVERY")).collectList()
+                couriersRepository.findAllByStatusIn(listOf("FREE", "DELIVERY")).collectList()
                     .flatMap { courier ->
-                        orderRepository.findAllByAssignedCourierIdIsNull().collectList()
+                        ordersRepository.findAllByAssignedCourierIdIsNull().collectList()
                             .map { order ->
                                 LambdaResponse("Response")
                             }.defaultIfEmpty(LambdaResponse("No orders"))

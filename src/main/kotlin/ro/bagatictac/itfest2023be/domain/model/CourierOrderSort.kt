@@ -19,12 +19,20 @@ class CourierOrderSort(
     val orderId: UUID,
 
     @Column(name = "action_type")
-    val actionType: String,
+    val actionType: CourierOrderSortActionType,
 
     val sort: Int,
 
-    val status: String,
+    val status: CourierOrderSortStatus,
 
     @Column(name = "venue_id")
     val venueId: UUID
 )
+
+enum class CourierOrderSortActionType {
+    PICKUP, DROPOFF
+}
+
+enum class CourierOrderSortStatus {
+    IN_PROGRESS, FINISHED
+}

@@ -5,7 +5,7 @@ import reactor.core.publisher.Flux
 import ro.bagatictac.itfest2023be.domain.model.Courier
 import java.util.UUID
 
-interface CourierRepository : R2dbcRepository<Courier, UUID> {
+interface CouriersRepository : R2dbcRepository<Courier, UUID> {
 
     fun findAllByStatusIn(courierStatus: List<String>): Flux<Courier>
 }

@@ -16,7 +16,7 @@ class Venue(
     val name: String,
 
     @Column(name = "type_of_venue")
-    val typeOfVenue: String,
+    val typeOfVenue: VenueType,
 
     val long: Double,
 
@@ -25,3 +25,7 @@ class Venue(
     @Column(name = "is_donating")
     val isDonating: Boolean
 )
+
+enum class VenueType {
+    RESTAURANT, MARKET_PLACE, FOOD_BANK, SHELTERS
+}
