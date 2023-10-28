@@ -67,7 +67,7 @@ class OrderTransformerService(
                 getAvailableCouriers(venueRequestBody).collectList()
                     .flatMap { availableCouriers ->
                         lambdaGateway.getCouriersAssigned(unassignedOrders, availableCouriers)
-                    }
+                    }.onErrorResume { log.info("Cannot assign available couriers to available orders. They are too far!"); Mono.empty()}
             }
     }
 
