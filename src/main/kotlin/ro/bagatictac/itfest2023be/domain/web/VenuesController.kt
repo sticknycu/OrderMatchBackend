@@ -23,7 +23,7 @@ class VenuesController(
     fun saveVenue(@RequestBody venueDto: VenueDto) = venuesService.saveVenue(venueDto.toVenue())
 }
 
-private fun VenueDto.toVenue() =
+fun VenueDto.toVenue() =
     Venue(
         name = this.name,
         typeOfVenue = this.typeOfVenue,
