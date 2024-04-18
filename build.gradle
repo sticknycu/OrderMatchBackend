@@ -60,4 +60,12 @@ test {
 
 jacocoTestReport {
     dependsOn test
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "ro/bagatictac/itfest2023be/domain/model/*",
+                    "ro/bagatictac/itfest2023be/domain/repository/*"
+            ])
+        }))
+    }
 }
